@@ -1,0 +1,40 @@
+{
+  "name": "pdffonts",
+  "version": "0.0.1",
+  "description": "Node bindings for Poppler's pdffonts CLI",
+  "main": "./lib/pdffonts.js",
+  "scripts": {
+    "lint": "eslint .",
+    "release:major": "changelog -M && git add CHANGELOG.md && git commit -m 'updated CHANGELOG.md' && npm version major && git push origin && git push origin --tags",
+    "release:minor": "changelog -m && git add CHANGELOG.md && git commit -m 'updated CHANGELOG.md' && npm version minor && git push origin && git push origin --tags",
+    "release:patch": "changelog -p && git add CHANGELOG.md && git commit -m 'updated CHANGELOG.md' && npm version patch && git push origin && git push origin --tags",
+    "test": "node-gyp rebuild && mocha test --require test/setup.js --recursive --timeout 30000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lob/pdffonts.git"
+  },
+  "keywords": [
+    "poppler",
+    "pdffonts",
+    "pdf",
+    "fonts"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lob/pdffonts/issues"
+  },
+  "homepage": "https://github.com/lob/pdffonts#readme",
+  "dependencies": {
+    "bindings": "^1.2.1",
+    "nan": "^2.3.3"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "eslint": "^1.10.3",
+    "eslint-config-lob": "^1.0.1",
+    "generate-changelog": "^1.0.1",
+    "mocha": "^2.4.5"
+  }
+}
