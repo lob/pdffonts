@@ -1,16 +1,13 @@
 language: node_js
-sudo: false
+sudo: required
+dist: trusty
 addons:
   apt:
     sources: ['ubuntu-toolchain-r-test']
     packages:
-      - libpoppler-cpp-dev
-      - libpoppler-dev
-      - libfontconfig1-dev
-      - libpng12-dev
-      - libjpeg-turbo8-dev
-      - libtiff4-dev
       - g++-4.9
+      - lcov
+      - libpoppler-cpp-dev
 env: CXX=g++-4.9
 node_js:
   - '0.10'
@@ -23,3 +20,4 @@ before_install:
 script:
   - npm test
   - npm run lint
+  - npm run coveralls
