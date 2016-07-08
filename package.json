@@ -1,5 +1,5 @@
 {
-  "name": "pdffonts",
+  "name": "@lob/pdffonts",
   "version": "0.0.1",
   "description": "Node bindings for Poppler's pdffonts CLI",
   "main": "./lib/pdffonts.js",
