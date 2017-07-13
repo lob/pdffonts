@@ -10,11 +10,7 @@ addons:
       - libpoppler-cpp-dev
 env: CXX=g++-4.9
 node_js:
-  - '0.10'
-  - '0.12'
-  - '4'
-  - '5'
-  - '6'
+  - '6.11.1'
 before_install:
   - npm i npm -g
 script:
