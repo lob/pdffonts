@@ -5,8 +5,6 @@
 #include <goo/GooString.h>
 #include <nan.h>
 
-using namespace v8;
-
 static const char *fontTypeNames[] = {
   "unknown",
   "Type 1",
@@ -22,70 +20,134 @@ static const char *fontTypeNames[] = {
   "CID TrueType (OT)"
 };
 
+class FontsWorker : public Nan::AsyncWorker {
+  public:
+    std::string filename;
+    GooList *fonts;
+
+    FontsWorker(std::string filename, Nan::Callback *callback)
+    : Nan::AsyncWorker(callback) {
+      this->filename = filename;
+    }
+
+    // It is not safe to access V8, or V8 data structures here, so everything
+    // we need for input and output should go on `this`.
+    void Execute () {
+      // Convert the file name into a string poppler can understand
+      GooString *gooFilename = new GooString(filename.c_str());
+
+      // Open PDF
+      PDFDoc *doc = PDFDocFactory().createPDFDoc(*gooFilename, NULL, NULL);
+
+      // Make sure it's a valid PDF
+      if (!doc->isOk()) {
+        this->SetErrorMessage("file is not a valid PDF");
+
+        // Cleanup
+        delete gooFilename;
+        delete doc;
+
+        return;
+      }
+
+      // Load fonts
+      FontInfoScanner scanner(doc, 0);
+      fonts = scanner.scan(doc->getNumPages());
+
+      delete gooFilename;
+      delete doc;
+    }
+
+    // Executed when the async work is complete. This function will be run
+    // inside the main event loop so it is safe to use V8 again.
+    void HandleOKCallback () {
+      Nan::HandleScope scope;
+
+      v8::Local<v8::Array> fontArray = Nan::New<v8::Array>(fonts->getLength());
+
+      for (int i = 0; i < this->fonts->getLength(); ++i) {
+        FontInfo *font = (FontInfo *)this->fonts->get(i);
+        const Ref fontRef = font->getRef();
+
+        v8::Local<v8::Object> fontObj = Nan::New<v8::Object>();
+        v8::Local<v8::Object> objectObj = Nan::New<v8::Object>();
+
+        const char *fontName;
+        if (font->getName() == NULL) {
+          fontName = "null";
+        } else {
+          fontName = font->getName()->getCString();
+        }
+
+        fontObj->Set(Nan::New("name").ToLocalChecked(), Nan::New(fontName).ToLocalChecked());
+        fontObj->Set(Nan::New("type").ToLocalChecked(), Nan::New(fontTypeNames[font->getType()]).ToLocalChecked());
+        fontObj->Set(Nan::New("encoding").ToLocalChecked(), Nan::New(font->getEncoding()->getCString()).ToLocalChecked());
+        fontObj->Set(Nan::New("embedded").ToLocalChecked(), Nan::New(font->getEmbedded()));
+        fontObj->Set(Nan::New("subset").ToLocalChecked(), Nan::New(font->getSubset()));
+        fontObj->Set(Nan::New("unicode").ToLocalChecked(), Nan::New(font->getToUnicode()));
+
+        objectObj->Set(Nan::New("number").ToLocalChecked(), Nan::New(fontRef.num));
+        objectObj->Set(Nan::New("generation").ToLocalChecked(), Nan::New(fontRef.gen));
+        fontObj->Set(Nan::New("object").ToLocalChecked(), objectObj);
+
+        fontArray->Set(i, fontObj);
+        delete font;
+      }
+
+      delete fonts;
+
+      v8::Local<v8::Value> argv[] = {
+        Nan::Null(),
+        fontArray
+      };
+
+      callback->Call(2, argv);
+    }
+
+    void HandleErrorCallback() {
+      Nan::HandleScope scope;
+      v8::Local<v8::Value> argv[] = {
+        Nan::New(this->ErrorMessage()).ToLocalChecked(),
+        Nan::Null()
+      };
+      callback->Call(2, argv);
+    }
+};
+
 NAN_METHOD(Fonts) {
-  // ensure a file name is passed in
-  if (info.Length() < 1) {
-    Nan::ThrowError("file name is required");
-    return;
+  if (info.Length() < 2) {
+    return Nan::ThrowError(Nan::New("expected 2 arguments").ToLocalChecked());
   }
 
-  // convert the file name into a string poppler can understand
-  String::Utf8Value cmd(info[0]);
-  std::string s = std::string(*cmd);
-  GooString *filename = new GooString(s.c_str());
-
-  // read config file
-  globalParams = new GlobalParams();
-
-  // open PDF
-  PDFDoc *doc = PDFDocFactory().createPDFDoc(*filename, NULL, NULL);
-
-  // make sure it's a valid PDF
-  if (!doc->isOk()) {
-    Nan::ThrowError("file is not a valid PDF");
-    return;
+  // Validate that arguments are correct
+  if (!info[0]->IsString()) {
+    return Nan::ThrowError(Nan::New("expected arg 0: string filename").ToLocalChecked());
   }
 
-  // load fonts
-  FontInfoScanner scanner(doc, 0);
-  GooList *fonts = scanner.scan(doc->getNumPages());
-
-  // construct Node array of object with font information
-  Local<v8::Array> fontArray = Nan::New<v8::Array>(fonts->getLength());
-
-  for (int i = 0; i < fonts->getLength(); ++i) {
-    FontInfo *font = (FontInfo *)fonts->get(i);
-    const Ref fontRef = font->getRef();
-
-    Local<v8::Object> fontObj = Nan::New<v8::Object>();
-    Local<v8::Object> objectObj = Nan::New<v8::Object>();
-
-    fontObj->Set(Nan::New("name").ToLocalChecked(), Nan::New(font->getName()->getCString()).ToLocalChecked());
-    fontObj->Set(Nan::New("type").ToLocalChecked(), Nan::New(fontTypeNames[font->getType()]).ToLocalChecked());
-    fontObj->Set(Nan::New("encoding").ToLocalChecked(), Nan::New(font->getEncoding()->getCString()).ToLocalChecked());
-    fontObj->Set(Nan::New("embedded").ToLocalChecked(), Nan::New(font->getEmbedded()));
-    fontObj->Set(Nan::New("subset").ToLocalChecked(), Nan::New(font->getSubset()));
-    fontObj->Set(Nan::New("unicode").ToLocalChecked(), Nan::New(font->getToUnicode()));
-
-    objectObj->Set(Nan::New("number").ToLocalChecked(), Nan::New(fontRef.num));
-    objectObj->Set(Nan::New("generation").ToLocalChecked(), Nan::New(fontRef.gen));
-    fontObj->Set(Nan::New("object").ToLocalChecked(), objectObj);
-
-    fontArray->Set(i, fontObj);
-    delete font;
+  if(!info[1]->IsFunction()) {
+    return Nan::ThrowError(Nan::New("expected arg 1: function callback").ToLocalChecked());
   }
 
-  // memory cleanup
-  delete filename;
-  delete globalParams;
-  delete doc;
-  delete fonts;
-
-  info.GetReturnValue().Set(fontArray);
+  // Start the async worker
+  Nan::AsyncQueueWorker(new FontsWorker(
+    std::string(*Nan::Utf8String(info[0]->ToString())),
+    new Nan::Callback(info[1].As<v8::Function>())
+  ));
 }
 
 NAN_MODULE_INIT(Init) {
-  Nan::Set(target, Nan::New("fonts").ToLocalChecked(), Nan::GetFunction(Nan::New<FunctionTemplate>(Fonts)).ToLocalChecked());
+  // Set globalParams once. globalParams is a global variable and is referenced
+  // by poppler in various methods.
+  //
+  // NOTE: This object is not explicitly cleaned up because the nan API makes it
+  // difficult to determine when a module can be cleaned up. Because it is
+  // initialized once and has a small memory footprint there is not as much of a
+  // concern around memory leaks.
+  if (globalParams == NULL) {
+    globalParams = new GlobalParams();
+  }
+
+  Nan::SetMethod(target, "fonts", Fonts);
 }
 
 NODE_MODULE(pdffonts, Init)
