@@ -15,14 +15,12 @@ To install Poppler on Mac OS X using Homebrew:
 brew install poppler
 ```
 
-To install Poppler on Ubuntu 14.04:
+To install Poppler on Ubuntu/Debian:
 
 ```
 apt-get install pkg-config
-apt-get install libpoppler-cpp-dev
+apt-get install libpoppler-private-dev
 ```
-
-**Note: The version of Poppler on `apt-get` on Ubuntu 12.04 doesn't contain all the functions necessary for this package. If you're using 12.04, you need to build the latest version Poppler from source.**
 
 ## Usage
 
