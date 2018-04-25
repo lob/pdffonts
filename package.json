@@ -37,8 +37,9 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "coveralls": "^2.11.9",
-    "eslint": "^1.10.3",
-    "eslint-config-lob": "^1.0.1",
+    "eslint": "4.8.0",
+    "eslint-config-lob": "3.0.0",
+    "eslint-plugin-lob": "1.0.1",
     "generate-changelog": "^1.0.1",
     "mocha": "^2.4.5"
   }

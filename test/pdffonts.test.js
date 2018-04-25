@@ -1,75 +1,98 @@
 'use strict';
 
-var Path = require('path');
+const Path = require('path');
 
-var PDFFonts = require('../lib/pdffonts');
+const PDFFonts = require('../lib/pdffonts');
 
-var EMBEDDED_FONTS_PATH    = Path.resolve(__dirname, 'assets/embedded-fonts.pdf');
-var NONEMBEDDED_FONTS_PATH = Path.resolve(__dirname, 'assets/nonembedded-fonts.pdf');
-var NO_FONTS_PATH          = Path.resolve(__dirname, 'assets/no-fonts.pdf');
-var NONEXISTENT_PATH       = Path.resolve(__dirname, 'assets/nonexistent.pdf');
-var NON_PDF_PATH           = Path.resolve(__dirname, 'assets/non-pdf.png');
+const EMBEDDED_FONTS_PATH    = Path.resolve(__dirname, 'assets/embedded-fonts.pdf');
+const NONEMBEDDED_FONTS_PATH = Path.resolve(__dirname, 'assets/nonembedded-fonts.pdf');
+const NO_FONTS_PATH          = Path.resolve(__dirname, 'assets/no-fonts.pdf');
+const NONEXISTENT_PATH       = Path.resolve(__dirname, 'assets/nonexistent.pdf');
+const NON_PDF_PATH           = Path.resolve(__dirname, 'assets/non-pdf.png');
 
-describe('pdffonts', function () {
+describe('pdffonts', () => {
 
-  describe('fonts', function () {
+  describe('fonts', () => {
 
-    it('returns an array of font objects', function () {
-      var fonts = PDFFonts.fonts(EMBEDDED_FONTS_PATH);
-      expect(fonts).to.eql([{
-        name: 'LDJWDV+DejaVuSerif-Bold',
-        type: 'CID TrueType',
-        encoding: 'Identity-H',
-        embedded: true,
-        subset: true,
-        unicode: true,
-        object: {
-          number: 8,
-          generation: 0
-        }
-      }]);
-    });
-
-    it('detects nonembedded fonts', function () {
-      var fonts = PDFFonts.fonts(NONEMBEDDED_FONTS_PATH);
-      fonts.forEach(function (font) {
-        expect(font.embedded).to.be.false;
+    it('returns an array of font objects', () => {
+      return PDFFonts.fonts(EMBEDDED_FONTS_PATH)
+      .then((fonts) => {
+        expect(fonts).to.eql([{
+          name: 'LDJWDV+DejaVuSerif-Bold',
+          type: 'CID TrueType',
+          encoding: 'Identity-H',
+          embedded: true,
+          subset: true,
+          unicode: true,
+          object: {
+            number: 8,
+            generation: 0
+          }
+        }]);
       });
     });
 
-    it('returns an empty array if there are no fonts', function () {
-      var fonts = PDFFonts.fonts(NO_FONTS_PATH);
-      expect(fonts).to.be.empty;
+    it('detects nonembedded fonts', () => {
+      return PDFFonts.fonts(NONEMBEDDED_FONTS_PATH)
+      .then((fonts) => {
+        fonts.forEach((font) => {
+          expect(font.embedded).to.be.false;
+        });
+      });
     });
 
-    it('throws an error if a file name is not passed in', function (done) {
+    it('returns an empty array if there are no fonts', () => {
+      return PDFFonts.fonts(NO_FONTS_PATH)
+      .then((fonts) => {
+        expect(fonts).to.be.empty;
+      });
+    });
+
+    it('throws an error if a file name is not passed in', () => {
+      return PDFFonts.fonts()
+      .catch((err) => err)
+      .then((err) => {
+        expect(err).to.be.an.instanceof(Error);
+        expect(err.message).to.eql('expected 2 arguments');
+      });
+    });
+
+    it('throws an error if first argument is not a string', () => {
+      return PDFFonts.fonts(42)
+      .catch((err) => err)
+      .then((err) => {
+        expect(err).to.be.an.instanceof(Error);
+        expect(err.message).to.eql('expected arg 0: string filename');
+      });
+    });
+
+    it('throws an error if second argument is not a function', () => {
+      const callbackPDFFonts = require('bindings')('pdffonts');
+
       try {
-        PDFFonts.fonts();
+        callbackPDFFonts.fonts(NO_FONTS_PATH, 'notAFunction');
       } catch (err) {
         expect(err).to.be.an.instanceof(Error);
-        expect(err.message).to.eql('file name is required');
-        done();
+        expect(err.message).to.eql('expected arg 1: function callback');
       }
     });
 
-    it('throws an error if a file does not exist', function (done) {
-      try {
-        PDFFonts.fonts(NONEXISTENT_PATH);
-      } catch (err) {
+    it('throws an error if a file does not exist', () => {
+      return PDFFonts.fonts(NONEXISTENT_PATH)
+      .catch((err) => err)
+      .then((err) => {
         expect(err).to.be.an.instanceof(Error);
         expect(err.message).to.eql('file is not a valid PDF');
-        done();
-      }
+      });
     });
 
-    it('throws an error if the file is not a PDF', function (done) {
-      try {
-        PDFFonts.fonts(NON_PDF_PATH);
-      } catch (err) {
+    it('throws an error if the file is not a PDF', () => {
+      return PDFFonts.fonts(NON_PDF_PATH)
+      .catch((err) => err)
+      .then((err) => {
         expect(err).to.be.an.instanceof(Error);
         expect(err.message).to.eql('file is not a valid PDF');
-        done();
-      }
+      });
     });
 
   });
