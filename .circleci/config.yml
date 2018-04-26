@@ -1,0 +1,30 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node:6.11.1
+    working_directory: ~/pdffonts
+    steps:
+      - checkout
+
+      - run:
+          name: Install system dependencies
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends g++-4.9 libpoppler-private-dev lcov
+
+      - run:
+          name: Install Node dependencies
+          command: yarn
+
+      - run:
+          name: Run linter
+          command: yarn lint
+
+      - run:
+          name: Run tests
+          command: yarn test
+
+      - run:
+          name: Enforce coverage
+          command: ./scripts/enforce_coverage.sh
