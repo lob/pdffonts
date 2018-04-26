@@ -1,21 +1,21 @@
 'use strict';
 
-var Path = require('path');
+const Path = require('path');
 
-var PDFFonts = require('../lib/pdffonts');
+const PDFFonts = require('../lib/pdffonts');
 
-var EMBEDDED_FONTS_PATH    = Path.resolve(__dirname, 'assets/embedded-fonts.pdf');
-var NONEMBEDDED_FONTS_PATH = Path.resolve(__dirname, 'assets/nonembedded-fonts.pdf');
-var NO_FONTS_PATH          = Path.resolve(__dirname, 'assets/no-fonts.pdf');
-var NONEXISTENT_PATH       = Path.resolve(__dirname, 'assets/nonexistent.pdf');
-var NON_PDF_PATH           = Path.resolve(__dirname, 'assets/non-pdf.png');
+const EMBEDDED_FONTS_PATH    = Path.resolve(__dirname, 'assets/embedded-fonts.pdf');
+const NONEMBEDDED_FONTS_PATH = Path.resolve(__dirname, 'assets/nonembedded-fonts.pdf');
+const NO_FONTS_PATH          = Path.resolve(__dirname, 'assets/no-fonts.pdf');
+const NONEXISTENT_PATH       = Path.resolve(__dirname, 'assets/nonexistent.pdf');
+const NON_PDF_PATH           = Path.resolve(__dirname, 'assets/non-pdf.png');
 
-describe('pdffonts', function () {
+describe('pdffonts', () => {
 
-  describe('fonts', function () {
+  describe('fonts', () => {
 
-    it('returns an array of font objects', function () {
-      var fonts = PDFFonts.fonts(EMBEDDED_FONTS_PATH);
+    it('returns an array of font objects', () => {
+      const fonts = PDFFonts.fonts(EMBEDDED_FONTS_PATH);
       expect(fonts).to.eql([{
         name: 'LDJWDV+DejaVuSerif-Bold',
         type: 'CID TrueType',
@@ -30,19 +30,19 @@ describe('pdffonts', function () {
       }]);
     });
 
-    it('detects nonembedded fonts', function () {
-      var fonts = PDFFonts.fonts(NONEMBEDDED_FONTS_PATH);
-      fonts.forEach(function (font) {
+    it('detects nonembedded fonts', () => {
+      const fonts = PDFFonts.fonts(NONEMBEDDED_FONTS_PATH);
+      fonts.forEach((font) => {
         expect(font.embedded).to.be.false;
       });
     });
 
-    it('returns an empty array if there are no fonts', function () {
-      var fonts = PDFFonts.fonts(NO_FONTS_PATH);
+    it('returns an empty array if there are no fonts', () => {
+      const fonts = PDFFonts.fonts(NO_FONTS_PATH);
       expect(fonts).to.be.empty;
     });
 
-    it('throws an error if a file name is not passed in', function (done) {
+    it('throws an error if a file name is not passed in', (done) => {
       try {
         PDFFonts.fonts();
       } catch (err) {
@@ -52,7 +52,7 @@ describe('pdffonts', function () {
       }
     });
 
-    it('throws an error if a file does not exist', function (done) {
+    it('throws an error if a file does not exist', (done) => {
       try {
         PDFFonts.fonts(NONEXISTENT_PATH);
       } catch (err) {
@@ -62,7 +62,7 @@ describe('pdffonts', function () {
       }
     });
 
-    it('throws an error if the file is not a PDF', function (done) {
+    it('throws an error if the file is not a PDF', (done) => {
       try {
         PDFFonts.fonts(NON_PDF_PATH);
       } catch (err) {
