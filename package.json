@@ -6,8 +6,8 @@
   "scripts": {
     "build": "node-gyp rebuild",
     "cover": "lcov -c -d build/Debug/obj.target/pdffonts/src -o coverage.info && lcov -e coverage.info '*pdffonts.cc' -o coverage.info",
-    "cover:html": "npm run cover && genhtml coverage.info -o coverage",
-    "coveralls": "npm run cover && cat coverage.info | coveralls",
+    "cover:html": "yarn run cover && genhtml coverage.info -o coverage",
+    "coveralls": "yarn run cover && cat coverage.info | coveralls",
     "lint": "eslint .",
     "release:major": "changelog -M && git add CHANGELOG.md && git commit -m 'updated CHANGELOG.md' && npm version major && git push origin && git push origin --tags",
     "release:minor": "changelog -m && git add CHANGELOG.md && git commit -m 'updated CHANGELOG.md' && npm version minor && git push origin && git push origin --tags",
@@ -37,8 +37,9 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "coveralls": "^2.11.9",
-    "eslint": "^1.10.3",
-    "eslint-config-lob": "^1.0.1",
+    "eslint": "4.8.0",
+    "eslint-config-lob": "3.0.0",
+    "eslint-plugin-lob": "1.0.1",
     "generate-changelog": "^1.0.1",
     "mocha": "^2.4.5"
   }
