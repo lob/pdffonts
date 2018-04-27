@@ -26,7 +26,7 @@ class FontsWorker : public Nan::AsyncWorker {
     GooList *fonts;
 
     FontsWorker(std::string filename, Nan::Callback *callback)
-    : Nan::AsyncWorker(callback) {
+    : Nan::AsyncWorker(callback, "nan:pdffonts.FontsWorker") {
       this->filename = filename;
     }
 
@@ -101,15 +101,6 @@ class FontsWorker : public Nan::AsyncWorker {
         fontArray
       };
 
-      callback->Call(2, argv);
-    }
-
-    void HandleErrorCallback() {
-      Nan::HandleScope scope;
-      v8::Local<v8::Value> argv[] = {
-        Nan::New(this->ErrorMessage()).ToLocalChecked(),
-        Nan::Null()
-      };
       callback->Call(2, argv);
     }
 };

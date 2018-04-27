@@ -88,12 +88,15 @@ describe('pdffonts', () => {
     it('throws an error if second argument is not a function', () => {
       const callbackPDFFonts = require('bindings')('pdffonts');
 
+      let err;
+
       try {
         callbackPDFFonts.fonts(NO_FONTS_PATH, 'notAFunction');
-      } catch (err) {
-        expect(err).to.be.an.instanceof(Error);
-        expect(err.message).to.eql('expected arg 1: function callback');
+      } catch (e) {
+        err = e;
       }
+      expect(err).to.be.an.instanceof(Error);
+      expect(err.message).to.eql('expected arg 1: function callback');
     });
 
     it('throws an error if a file does not exist', () => {
