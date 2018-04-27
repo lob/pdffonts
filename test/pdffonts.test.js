@@ -53,7 +53,7 @@ describe('pdffonts', () => {
       return PDFFonts.fonts(TYPE_3_FONT_PATH)
       .then((fonts) => {
         expect(fonts).to.eql([{
-          name: 'null',
+          name: '',
           type: 'Type 3',
           encoding: 'Custom',
           embedded: true,

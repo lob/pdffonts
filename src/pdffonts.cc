@@ -5,7 +5,7 @@
 #include <goo/GooString.h>
 #include <nan.h>
 
-static const char *fontTypeNames[] = {
+static const char* fontTypeNames[] = {
   "unknown",
   "Type 1",
   "Type 1C",
@@ -23,9 +23,9 @@ static const char *fontTypeNames[] = {
 class FontsWorker : public Nan::AsyncWorker {
   public:
     std::string filename;
-    GooList *fonts;
+    GooList* fonts;
 
-    FontsWorker(std::string filename, Nan::Callback *callback)
+    FontsWorker(std::string filename, Nan::Callback* callback)
     : Nan::AsyncWorker(callback, "nan:pdffonts.FontsWorker") {
       this->filename = filename;
     }
@@ -34,19 +34,17 @@ class FontsWorker : public Nan::AsyncWorker {
     // we need for input and output should go on `this`.
     void Execute () {
       // Convert the file name into a string poppler can understand
-      GooString *gooFilename = new GooString(filename.c_str());
+      GooString gooFilename(filename.c_str());
 
       // Open PDF
-      PDFDoc *doc = PDFDocFactory().createPDFDoc(*gooFilename, NULL, NULL);
+      PDFDoc* doc = PDFDocFactory().createPDFDoc(gooFilename, NULL, NULL);
 
       // Make sure it's a valid PDF
       if (!doc->isOk()) {
         this->SetErrorMessage("file is not a valid PDF");
 
         // Cleanup
-        delete gooFilename;
         delete doc;
-
         return;
       }
 
@@ -54,7 +52,6 @@ class FontsWorker : public Nan::AsyncWorker {
       FontInfoScanner scanner(doc, 0);
       fonts = scanner.scan(doc->getNumPages());
 
-      delete gooFilename;
       delete doc;
     }
 
@@ -66,20 +63,18 @@ class FontsWorker : public Nan::AsyncWorker {
       v8::Local<v8::Array> fontArray = Nan::New<v8::Array>(fonts->getLength());
 
       for (int i = 0; i < this->fonts->getLength(); ++i) {
-        FontInfo *font = (FontInfo *)this->fonts->get(i);
+        FontInfo* font = (FontInfo*)this->fonts->get(i);
         const Ref fontRef = font->getRef();
 
         v8::Local<v8::Object> fontObj = Nan::New<v8::Object>();
         v8::Local<v8::Object> objectObj = Nan::New<v8::Object>();
 
-        const char *fontName;
         if (font->getName() == NULL) {
-          fontName = "null";
+          fontObj->Set(Nan::New("name").ToLocalChecked(), Nan::EmptyString());
         } else {
-          fontName = font->getName()->getCString();
+          fontObj->Set(Nan::New("name").ToLocalChecked(), Nan::New(font->getName()->getCString()).ToLocalChecked());
         }
 
-        fontObj->Set(Nan::New("name").ToLocalChecked(), Nan::New(fontName).ToLocalChecked());
         fontObj->Set(Nan::New("type").ToLocalChecked(), Nan::New(fontTypeNames[font->getType()]).ToLocalChecked());
         fontObj->Set(Nan::New("encoding").ToLocalChecked(), Nan::New(font->getEncoding()->getCString()).ToLocalChecked());
         fontObj->Set(Nan::New("embedded").ToLocalChecked(), Nan::New(font->getEmbedded()));
