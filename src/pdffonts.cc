@@ -80,11 +80,14 @@ class FontsWorker : public Nan::AsyncWorker {
         fontObj->Set(Nan::New("subset").ToLocalChecked(), Nan::New(font->getSubset()));
         fontObj->Set(Nan::New("unicode").ToLocalChecked(), Nan::New(font->getToUnicode()));
 
+        // Invalid object generation number should set object metadata to null
         // Logic taken from pdffonts.cc
         // See: https://cgit.freedesktop.org/poppler/poppler/tree/utils/pdffonts.cc?id=eb1291f86260124071e12226294631ce685eaad6#n207
         if (fontRef.gen >= 100000) {
           fontObj->Set(Nan::New("object").ToLocalChecked(), Nan::Null());
         } else {
+          // PDF object reference metadata
+          // For context see: http://www.printmyfolders.com/understanding-pdf
           v8::Local<v8::Object> objectObj = Nan::New<v8::Object>();
 
           objectObj->Set(Nan::New("number").ToLocalChecked(), Nan::New(fontRef.num));
