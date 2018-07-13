@@ -67,10 +67,9 @@ class FontsWorker : public Nan::AsyncWorker {
         const Ref fontRef = font->getRef();
 
         v8::Local<v8::Object> fontObj = Nan::New<v8::Object>();
-        v8::Local<v8::Object> objectObj = Nan::New<v8::Object>();
 
         if (font->getName() == NULL) {
-          fontObj->Set(Nan::New("name").ToLocalChecked(), Nan::EmptyString());
+          fontObj->Set(Nan::New("name").ToLocalChecked(), Nan::Null());
         } else {
           fontObj->Set(Nan::New("name").ToLocalChecked(), Nan::New(font->getName()->getCString()).ToLocalChecked());
         }
@@ -81,9 +80,18 @@ class FontsWorker : public Nan::AsyncWorker {
         fontObj->Set(Nan::New("subset").ToLocalChecked(), Nan::New(font->getSubset()));
         fontObj->Set(Nan::New("unicode").ToLocalChecked(), Nan::New(font->getToUnicode()));
 
-        objectObj->Set(Nan::New("number").ToLocalChecked(), Nan::New(fontRef.num));
-        objectObj->Set(Nan::New("generation").ToLocalChecked(), Nan::New(fontRef.gen));
-        fontObj->Set(Nan::New("object").ToLocalChecked(), objectObj);
+        // Logic taken from pdffonts.cc
+        // See: https://cgit.freedesktop.org/poppler/poppler/tree/utils/pdffonts.cc?id=eb1291f86260124071e12226294631ce685eaad6#n207
+        if (fontRef.gen >= 100000) {
+          fontObj->Set(Nan::New("object").ToLocalChecked(), Nan::Null());
+        } else {
+          v8::Local<v8::Object> objectObj = Nan::New<v8::Object>();
+
+          objectObj->Set(Nan::New("number").ToLocalChecked(), Nan::New(fontRef.num));
+          objectObj->Set(Nan::New("generation").ToLocalChecked(), Nan::New(fontRef.gen));
+
+          fontObj->Set(Nan::New("object").ToLocalChecked(), objectObj);
+        }
 
         fontArray->Set(i, fontObj);
         delete font;
