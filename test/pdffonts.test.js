@@ -5,10 +5,11 @@ const Path = require('path');
 const PDFFonts = require('../lib/pdffonts');
 
 const EMBEDDED_FONTS_PATH    = Path.resolve(__dirname, 'assets/embedded-fonts.pdf');
-const NONEMBEDDED_FONTS_PATH = Path.resolve(__dirname, 'assets/nonembedded-fonts.pdf');
+const INVALID_OBJECT_ID_PATH = Path.resolve(__dirname, 'assets/invalid-object-id.pdf');
 const NO_FONTS_PATH          = Path.resolve(__dirname, 'assets/no-fonts.pdf');
-const NONEXISTENT_PATH       = Path.resolve(__dirname, 'assets/nonexistent.pdf');
 const NON_PDF_PATH           = Path.resolve(__dirname, 'assets/non-pdf.png');
+const NONEMBEDDED_FONTS_PATH = Path.resolve(__dirname, 'assets/nonembedded-fonts.pdf');
+const NONEXISTENT_PATH       = Path.resolve(__dirname, 'assets/nonexistent.pdf');
 const TYPE_3_FONT_PATH       = Path.resolve(__dirname, 'assets/type-3-font.pdf');
 
 describe('pdffonts', () => {
@@ -53,7 +54,7 @@ describe('pdffonts', () => {
       return PDFFonts.fonts(TYPE_3_FONT_PATH)
       .then((fonts) => {
         expect(fonts).to.eql([{
-          name: '',
+          name: null,
           type: 'Type 3',
           encoding: 'Custom',
           embedded: true,
@@ -64,6 +65,13 @@ describe('pdffonts', () => {
             generation: 0
           }
         }]);
+      });
+    });
+
+    it('handles fonts with invalid object ID', () => {
+      return PDFFonts.fonts(INVALID_OBJECT_ID_PATH)
+      .then(([font]) => {
+        expect(font.object).to.be.null;
       });
     });
 
