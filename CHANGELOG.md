@@ -1,3 +1,9 @@
+### 1.1.0 (2018-07-13)
+
+##### New Features
+
+* **fonts:**  make name/object null ([#8](https://github.com/lob/pdffonts/pull/8)) ([1912e6ff](https://github.com/lob/pdffonts/commit/1912e6fff2a9f437354845d8312354ab6ce634f9))
+
 ## 1.0.0 (2018-04-30)
 
 ##### New Features
