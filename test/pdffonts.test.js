@@ -11,6 +11,7 @@ const NON_PDF_PATH           = Path.resolve(__dirname, 'assets/non-pdf.png');
 const NONEMBEDDED_FONTS_PATH = Path.resolve(__dirname, 'assets/nonembedded-fonts.pdf');
 const NONEXISTENT_PATH       = Path.resolve(__dirname, 'assets/nonexistent.pdf');
 const TYPE_3_FONT_PATH       = Path.resolve(__dirname, 'assets/type-3-font.pdf');
+const LANGUAGE_PACK_REQUIRED = Path.resolve(__dirname, 'assets/language-pack-required.pdf');
 
 describe('pdffonts', () => {
 
@@ -72,6 +73,92 @@ describe('pdffonts', () => {
       return PDFFonts.fonts(INVALID_OBJECT_ID_PATH)
       .then(([font]) => {
         expect(font.object).to.be.null;
+      });
+    });
+
+    it('handles language pack-required mappings', () => {
+      return PDFFonts.fonts(LANGUAGE_PACK_REQUIRED)
+      .then((fonts) => {
+        expect(fonts).to.eql([
+          {
+            name: 'DotumChe',
+            type: 'CID Type 0',
+            encoding: 'KSCms-UHC-H',
+            embedded: false,
+            subset: false,
+            unicode: false,
+            object: {
+              number: 41,
+              generation: 0
+            }
+          }, {
+            name: 'SimSun',
+            type: 'CID Type 0',
+            encoding: 'GBK-EUC-H',
+            embedded: false,
+            subset: false,
+            unicode: false,
+            object: {
+              number: 37,
+              generation: 0
+            }
+          }, {
+            name: 'MS-Gothic',
+            type: 'CID Type 0',
+            encoding: '90ms-RKSJ-H',
+            embedded: false,
+            subset: false,
+            unicode: false,
+            object: {
+              number: 44,
+              generation: 0
+            }
+          }, {
+            name: 'MingLiU',
+            type: 'CID Type 0',
+            encoding: 'ETen-B5-H',
+            embedded: false,
+            subset: false,
+            unicode: false,
+            object: {
+              number: 43,
+              generation: 0
+            }
+          }, {
+            name: 'Helvetica',
+            type: 'Type 1',
+            encoding: 'Custom',
+            embedded: false,
+            subset: false,
+            unicode: false,
+            object: {
+              number: 39,
+              generation: 0
+            }
+          }, {
+            name: 'Helvetica',
+            type: 'Type 1',
+            encoding: 'Custom',
+            embedded: false,
+            subset: false,
+            unicode: false,
+            object: {
+              number: 38,
+              generation: 0
+            }
+          }, {
+            name: 'Helvetica',
+            type: 'Type 1',
+            encoding: 'Custom',
+            embedded: false,
+            subset: false,
+            unicode: false,
+            object: {
+              number: 40,
+              generation: 0
+            }
+          }
+        ]);
       });
     });
 
