@@ -1,3 +1,9 @@
+#### 1.1.1 (2019-05-10)
+
+##### Bug Fixes
+
+* **fonts:**  adds docs and tests for potentially missing language pack ([#9](https://github.com/lob/pdffonts/pull/9)) ([27ba8d76](https://github.com/lob/pdffonts/commit/27ba8d76e951abd0bc1235d7373828d75c37c131))
+
 ### 1.1.0 (2018-07-13)
 
 ##### New Features
