@@ -20,6 +20,7 @@ To install Poppler on Ubuntu/Debian:
 ```
 apt-get install pkg-config
 apt-get install libpoppler-private-dev
+apt-get install poppler-data
 ```
 
 ## Usage
