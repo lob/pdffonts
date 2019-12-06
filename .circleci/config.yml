@@ -11,7 +11,7 @@ jobs:
           docker_layer_caching: true
 
       - run:
-          name: Install System dependencies
+          name: Install system dependencies
           command: |
             apk update --update-cache
             apk add --update git openssh-client curl docker-cli
