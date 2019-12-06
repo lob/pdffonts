@@ -40,7 +40,6 @@
     "coveralls": "^3.0.9",
     "eslint": "6.7.2",
     "eslint-config-lob": "4.0.0",
-    "eslint-plugin-lob": "1.2.0",
     "generate-changelog": "^1.8.0",
     "mocha": "^6.2.2"
   }
