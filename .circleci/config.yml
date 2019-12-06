@@ -17,17 +17,20 @@ jobs:
             apk add --update git openssh-client curl docker-cli
 
       - run:
-          name: Install Node dependencies
-          command: yarn
+          name: Create docker container
+          command: |
+              docker build . \
+              --build-arg NODE_ENV=development \
+              -t 'pdffonts'
 
       - run:
           name: Run linter
-          command: yarn lint
+          command: docker run -t pdffonts yarn lint
 
       - run:
           name: Run tests
-          command: yarn test
+          command: docker run -t pdffonts yarn test
 
       - run:
           name: Enforce coverage
-          command: ./scripts/enforce_coverage.sh
+          command: docker run -t pdffonts ./scripts/enforce_coverage.sh

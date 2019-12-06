@@ -9,6 +9,9 @@ apk add --no-cache --virtual .build-deps python make g++
 apk add --no-cache ca-certificates
 update-ca-certificates
 
+# For cov reports
+apk add lcov --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing
+
 # Install chamber
 wget -q -O /usr/bin/chamber https://github.com/segmentio/chamber/releases/download/v2.0.0/chamber-v2.0.0-linux-amd64 \
           && chmod +x /usr/bin/chamber
