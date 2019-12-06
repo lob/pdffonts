@@ -127,7 +127,7 @@ NAN_METHOD(Fonts) {
 
   // Start the async worker
   Nan::AsyncQueueWorker(new FontsWorker(
-    std::string(*Nan::Utf8String(info[0]->ToString())),
+    std::string(*Nan::Utf8String(info[0])),
     new Nan::Callback(info[1].As<v8::Function>())
   ));
 }
