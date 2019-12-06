@@ -21,22 +21,21 @@ jobs:
           command: |
               docker build . \
               --build-arg NODE_ENV=development \
-              -t 'pdffonts'
+              -t "$CIRCLE_PROJECT_REPONAME"
+
       - run:
           name: Run docker container
           command: |
-              docker run \
-              -t 'pdffonts' \
-              --name 'pdffonts-container'
-              -d
+              docker run --name "$CIRCLE_PROJECT_REPONAME-container" -t -d "$CIRCLE_PROJECT_REPONAME"
+
       - run:
           name: Run linter
-          command: docker exec -t pdffonts-container yarn lint
+          command: docker exec -t "$CIRCLE_PROJECT_REPONAME-container" yarn lint
 
       - run:
           name: Run tests
-          command: docker exec -t pdffonts-container yarn test
+          command: docker exec -t "$CIRCLE_PROJECT_REPONAME-container" yarn test
 
       - run:
-          name: Enforce coverage
-          command: docker exec -t pdffonts-container ./scripts/enforce_coverage.sh
+          name: Remove container
+          command: docker rm --force "$CIRCLE_PROJECT_REPONAME-container"
