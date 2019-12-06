@@ -22,15 +22,21 @@ jobs:
               docker build . \
               --build-arg NODE_ENV=development \
               -t 'pdffonts'
-
+      - run:
+          name: Run docker container
+          command: |
+              docker run \
+              -t 'pdffonts' \
+              --name 'pdffonts-container'
+              -d
       - run:
           name: Run linter
-          command: docker run -t pdffonts yarn lint
+          command: docker exec -t pdffonts-container yarn lint
 
       - run:
           name: Run tests
-          command: docker run -t pdffonts yarn test
+          command: docker exec -t pdffonts-container yarn test
 
       - run:
           name: Enforce coverage
-          command: docker run -t pdffonts ./scripts/enforce_coverage.sh
+          command: docker exec -t pdffonts-container ./scripts/enforce_coverage.sh
