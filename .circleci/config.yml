@@ -37,5 +37,9 @@ jobs:
           command: docker exec -t "$CIRCLE_PROJECT_REPONAME-container" yarn test
 
       - run:
+          name: Enforce coverage
+          command: docker exec -t "$CIRCLE_PROJECT_REPONAME-container" ./scripts/enforce_coverage.sh
+
+      - run:
           name: Remove container
           command: docker rm --force "$CIRCLE_PROJECT_REPONAME-container"
