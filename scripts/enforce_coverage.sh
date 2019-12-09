@@ -1,8 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 THRESHOLD=100
 
 COVER_OUTPUT="$(yarn run cover)"
+status=$?
+if [ $status -ne 0 ]; then
+  exit $status
+fi
 
 echo "Checking against threshold of ${THRESHOLD}%"
 
@@ -14,3 +18,5 @@ for PERCENT in $PERCENTS; do
     exit 1
   fi
 done
+
+echo "Coverage is 100%"

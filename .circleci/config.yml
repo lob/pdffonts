@@ -2,35 +2,44 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/node:6.11.1
+      - image: alpine:3.10
     working_directory: ~/pdffonts
     steps:
       - checkout
 
+      - setup_remote_docker:
+          docker_layer_caching: true
+
       - run:
           name: Install system dependencies
           command: |
-            sudo sh -c 'echo "deb http://deb.debian.org/debian/ jessie main" > /etc/apt/sources.list'
-            sudo sh -c 'echo "deb-src http://deb.debian.org/debian/ jessie main" >> /etc/apt/sources.list'
-            sudo sh -c 'echo "deb http://security.debian.org/ jessie/updates main" >> /etc/apt/sources.list'
-            sudo sh -c 'echo "deb-src http://security.debian.org/ jessie/updates main" >> /etc/apt/sources.list'
-            sudo sh -c 'echo "deb http://archive.debian.org/debian jessie-backports main" >> /etc/apt/sources.list'
-            sudo sh -c 'echo "deb-src http://archive.debian.org/debian jessie-backports main" >> /etc/apt/sources.list'
-            sudo apt-get update -o Acquire::Check-Valid-Until=false -o Acquire::CompressionTypes::Order::=gz
-            sudo apt-get install -y --no-install-recommends g++-4.9 libpoppler-private-dev poppler-data lcov
+            apk update --update-cache
+            apk add --update git openssh-client curl docker-cli
 
       - run:
-          name: Install Node dependencies
-          command: yarn
+          name: Create docker container
+          command: |
+              docker build . \
+              --build-arg NODE_ENV=development \
+              -t "$CIRCLE_PROJECT_REPONAME"
+
+      - run:
+          name: Run docker container
+          command: |
+              docker run --name "$CIRCLE_PROJECT_REPONAME-container" -t -d "$CIRCLE_PROJECT_REPONAME"
 
       - run:
           name: Run linter
-          command: yarn lint
+          command: docker exec -t "$CIRCLE_PROJECT_REPONAME-container" yarn lint
 
       - run:
           name: Run tests
-          command: yarn test
+          command: docker exec -t "$CIRCLE_PROJECT_REPONAME-container" yarn test
 
       - run:
           name: Enforce coverage
-          command: ./scripts/enforce_coverage.sh
+          command: docker exec -t "$CIRCLE_PROJECT_REPONAME-container" ./scripts/enforce_coverage.sh
+
+      - run:
+          name: Remove container
+          command: docker rm --force "$CIRCLE_PROJECT_REPONAME-container"
