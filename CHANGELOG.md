@@ -1,3 +1,9 @@
+## 2.0.0 (2019-12-11)
+
+##### Bug Fixes
+
+* **node-12:**  Add support for node 12 ([#10](https://github.com/lob/pdffonts/pull/10)) ([d2c32761](https://github.com/lob/pdffonts/commit/d2c327615b9fedef55d62b70aa9575d172cf2d6c))
+
 #### 1.1.1 (2019-05-10)
 
 ##### Bug Fixes
