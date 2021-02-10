@@ -67,7 +67,8 @@ class FontsWorker : public Nan::AsyncWorker {
         const Ref fontRef = font->getRef();
 
         v8::Local<v8::Object> fontObj = Nan::New<v8::Object>();
-        v8::Local<v8::Context> context;
+        v8::Local<v8::Context> context = Nan::GetCurrentContext();
+
 
         if (font->getName() == NULL) {
           fontObj->Set(context, Nan::New("name").ToLocalChecked(), Nan::Null()); // BAD
