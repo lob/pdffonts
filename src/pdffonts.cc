@@ -67,36 +67,37 @@ class FontsWorker : public Nan::AsyncWorker {
         const Ref fontRef = font->getRef();
 
         v8::Local<v8::Object> fontObj = Nan::New<v8::Object>();
+        v8::Local<v8::Context> context;
 
         if (font->getName() == NULL) {
-          fontObj->Set(Nan::New("name").ToLocalChecked(), Nan::Null()); // BAD
+          fontObj->Set(context, Nan::New("name").ToLocalChecked(), Nan::Null()); // BAD
         } else {
-          fontObj->Set(Nan::New("name").ToLocalChecked(), Nan::New(font->getName()->getCString()).ToLocalChecked()); // BAD
+          fontObj->Set(context, Nan::New("name").ToLocalChecked(), Nan::New(font->getName()->getCString()).ToLocalChecked()); // BAD
         }
 
-        fontObj->Set(Nan::New("type").ToLocalChecked(), Nan::New(fontTypeNames[font->getType()]).ToLocalChecked()); // BAD
-        fontObj->Set(Nan::New("encoding").ToLocalChecked(), Nan::New(font->getEncoding()->getCString()).ToLocalChecked()); // BAD
-        fontObj->Set(Nan::New("embedded").ToLocalChecked(), Nan::New(font->getEmbedded())); // BAD
-        fontObj->Set(Nan::New("subset").ToLocalChecked(), Nan::New(font->getSubset())); // BAD
-        fontObj->Set(Nan::New("unicode").ToLocalChecked(), Nan::New(font->getToUnicode())); // BAD
+        fontObj->Set(context, Nan::New("type").ToLocalChecked(), Nan::New(fontTypeNames[font->getType()]).ToLocalChecked()); // BAD
+        fontObj->Set(context, Nan::New("encoding").ToLocalChecked(), Nan::New(font->getEncoding()->getCString()).ToLocalChecked()); // BAD
+        fontObj->Set(context, Nan::New("embedded").ToLocalChecked(), Nan::New(font->getEmbedded())); // BAD
+        fontObj->Set(context, Nan::New("subset").ToLocalChecked(), Nan::New(font->getSubset())); // BAD
+        fontObj->Set(context, Nan::New("unicode").ToLocalChecked(), Nan::New(font->getToUnicode())); // BAD
 
         // Invalid object generation number should set object metadata to null
         // Logic taken from pdffonts.cc
         // See: https://cgit.freedesktop.org/poppler/poppler/tree/utils/pdffonts.cc?id=eb1291f86260124071e12226294631ce685eaad6#n207
         if (fontRef.gen >= 100000) {
-          fontObj->Set(Nan::New("object").ToLocalChecked(), Nan::Null()); // BAD
+          fontObj->Set(context, Nan::New("object").ToLocalChecked(), Nan::Null()); // BAD
         } else {
           // PDF object reference metadata
           // For context see: http://www.printmyfolders.com/understanding-pdf
           v8::Local<v8::Object> objectObj = Nan::New<v8::Object>();
 
-          objectObj->Set(Nan::New("number").ToLocalChecked(), Nan::New(fontRef.num)); // BAD
-          objectObj->Set(Nan::New("generation").ToLocalChecked(), Nan::New(fontRef.gen)); // BAD
+          objectObj->Set(context, Nan::New("number").ToLocalChecked(), Nan::New(fontRef.num)); // BAD
+          objectObj->Set(context, Nan::New("generation").ToLocalChecked(), Nan::New(fontRef.gen)); // BAD
 
-          fontObj->Set(Nan::New("object").ToLocalChecked(), objectObj); // BAD
+          fontObj->Set(context, Nan::New("object").ToLocalChecked(), objectObj); // BAD
         }
 
-        fontArray->Set(i, fontObj); // BAD
+        fontArray->Set(context, i, fontObj); // BAD
         delete font;
       }
 
