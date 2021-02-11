@@ -1,3 +1,13 @@
+### 2.1.0 (2021-02-11)
+
+##### Build System / Dependencies
+
+* **deps:**  bump lodash from 4.17.15 to 4.17.19 ([#11](https://github.com/lob/pdffonts/pull/11)) ([65cda96f](https://github.com/lob/pdffonts/commit/65cda96fb8437ad79edefaff45eb6c11edb9fafa))
+
+##### Bug Fixes
+
+* **node-14:**  Add support for node 14 ([#13](https://github.com/lob/pdffonts/pull/13)) ([cff85d04](https://github.com/lob/pdffonts/commit/cff85d04192795870dc7ec16f301a18d4e93d6d1))
+
 #### 2.0.1 (2019-12-11)
 
 #### 2.0.1 (2019-12-11)
