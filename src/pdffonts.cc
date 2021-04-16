@@ -23,7 +23,7 @@ static const char* fontTypeNames[] = {
 class FontsWorker : public Nan::AsyncWorker {
   public:
     std::string filename;
-    GooList* fonts;
+    std::vector<FontInfo*> fonts;
 
     FontsWorker(std::string filename, Nan::Callback* callback)
     : Nan::AsyncWorker(callback, "nan:pdffonts.FontsWorker") {
@@ -37,22 +37,17 @@ class FontsWorker : public Nan::AsyncWorker {
       GooString gooFilename(filename.c_str());
 
       // Open PDF
-      PDFDoc* doc = PDFDocFactory().createPDFDoc(gooFilename, NULL, NULL);
+      std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(gooFilename, nullptr, nullptr));
 
       // Make sure it's a valid PDF
       if (!doc->isOk()) {
         this->SetErrorMessage("file is not a valid PDF");
-
-        // Cleanup
-        delete doc;
         return;
       }
 
       // Load fonts
-      FontInfoScanner scanner(doc, 0);
-      fonts = scanner.scan(doc->getNumPages());
-
-      delete doc;
+      FontInfoScanner scanner(doc.get(), 0);
+      this->fonts = scanner.scan(doc->getNumPages());
     }
 
     // Executed when the async work is complete. This function will be run
@@ -60,24 +55,23 @@ class FontsWorker : public Nan::AsyncWorker {
     void HandleOKCallback () {
       Nan::HandleScope scope;
 
-      v8::Local<v8::Array> fontArray = Nan::New<v8::Array>(fonts->getLength());
+      v8::Local<v8::Array> fontArray = Nan::New<v8::Array>(fonts.size());
 
-      for (int i = 0; i < this->fonts->getLength(); ++i) {
-        FontInfo* font = (FontInfo*)this->fonts->get(i);
+      for (int i = 0; i < (int)fonts.size(); ++i) {
+        FontInfo* font = (FontInfo*)this->fonts[i];
         const Ref fontRef = font->getRef();
 
         v8::Local<v8::Object> fontObj = Nan::New<v8::Object>();
         v8::Local<v8::Context> context = Nan::GetCurrentContext();
 
-
         if (font->getName() == NULL) {
           fontObj->Set(context, Nan::New("name").ToLocalChecked(), Nan::Null());
         } else {
-          fontObj->Set(context, Nan::New("name").ToLocalChecked(), Nan::New(font->getName()->getCString()).ToLocalChecked());
+          fontObj->Set(context, Nan::New("name").ToLocalChecked(), Nan::New(font->getName()->c_str()).ToLocalChecked());
         }
 
         fontObj->Set(context, Nan::New("type").ToLocalChecked(), Nan::New(fontTypeNames[font->getType()]).ToLocalChecked());
-        fontObj->Set(context, Nan::New("encoding").ToLocalChecked(), Nan::New(font->getEncoding()->getCString()).ToLocalChecked());
+        fontObj->Set(context, Nan::New("encoding").ToLocalChecked(), Nan::New(font->getEncoding()->c_str()).ToLocalChecked());
         fontObj->Set(context, Nan::New("embedded").ToLocalChecked(), Nan::New(font->getEmbedded()));
         fontObj->Set(context, Nan::New("subset").ToLocalChecked(), Nan::New(font->getSubset()));
         fontObj->Set(context, Nan::New("unicode").ToLocalChecked(), Nan::New(font->getToUnicode()));
@@ -102,14 +96,12 @@ class FontsWorker : public Nan::AsyncWorker {
         delete font;
       }
 
-      delete fonts;
-
       v8::Local<v8::Value> argv[] = {
         Nan::Null(),
         fontArray
       };
 
-      callback->Call(2, argv);
+      callback->Call(2, argv, async_resource);
     }
 };
 
@@ -143,7 +135,8 @@ NAN_MODULE_INIT(Init) {
   // initialized once and has a small memory footprint there is not as much of a
   // concern around memory leaks.
   if (globalParams == NULL) {
-    globalParams = new GlobalParams();
+    // globalParams = new GlobalParams();
+    globalParams = std::unique_ptr<GlobalParams>(new GlobalParams);
   }
 
   Nan::SetMethod(target, "fonts", Fonts);

@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: alpine:3.10
+      - image: alpine:3.14
     working_directory: ~/pdffonts
     steps:
       - checkout
@@ -30,11 +30,11 @@ jobs:
 
       - run:
           name: Run linter
-          command: docker exec -t "$CIRCLE_PROJECT_REPONAME-container" yarn lint
+          command: docker exec -t "$CIRCLE_PROJECT_REPONAME-container" npm lint
 
       - run:
           name: Run tests
-          command: docker exec -t "$CIRCLE_PROJECT_REPONAME-container" yarn test
+          command: docker exec -t "$CIRCLE_PROJECT_REPONAME-container" npm test
 
       - run:
           name: Enforce coverage
