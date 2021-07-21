@@ -7,7 +7,6 @@
     "node": ">=12.0.0"
   },
   "scripts": {
-    "build": "node-gyp rebuild",
     "cover": "lcov -c -d build/Debug/obj.target/pdffonts/src -o coverage.info && lcov -e coverage.info '*pdffonts.cc' -o coverage.info",
     "cover:html": "yarn run cover && genhtml coverage.info -o coverage",
     "coveralls": "yarn run cover && cat coverage.info | coveralls",
@@ -15,7 +14,7 @@
     "release:major": "changelog -M && git add CHANGELOG.md && git commit -m 'updated CHANGELOG.md' && npm version major && git push origin && git push origin --tags",
     "release:minor": "changelog -m && git add CHANGELOG.md && git commit -m 'updated CHANGELOG.md' && npm version minor && git push origin && git push origin --tags",
     "release:patch": "changelog -p && git add CHANGELOG.md && git commit -m 'updated CHANGELOG.md' && npm version patch && git push origin && git push origin --tags",
-    "test": "node-gyp --debug rebuild && mocha test --require test/setup.js --recursive --timeout 30000"
+    "test": "mocha test --require test/setup.js --recursive --timeout 30000"
   },
   "repository": {
     "type": "git",
@@ -35,7 +34,8 @@
   "homepage": "https://github.com/lob/pdffonts#readme",
   "dependencies": {
     "bindings": "^1.5.0",
-    "nan": "^2.14.0"
+    "nan": "^2.14.0",
+    "pdfjs-dist": "^2.8.335"
   },
   "devDependencies": {
     "chai": "^4.2.0",
