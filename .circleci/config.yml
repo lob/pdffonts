@@ -8,6 +8,7 @@ jobs:
       - checkout
 
       - setup_remote_docker:
+          version: 20.10.6
           docker_layer_caching: true
 
       - run:
@@ -30,7 +31,7 @@ jobs:
 
       - run:
           name: Run linter
-          command: docker exec -t "$CIRCLE_PROJECT_REPONAME-container" npm lint
+          command: docker exec -t "$CIRCLE_PROJECT_REPONAME-container" npm run lint
 
       - run:
           name: Run tests
