@@ -1,4 +1,4 @@
-FROM node:14.15.4-alpine3.10
+FROM node:16-alpine3.14
 
 ARG NODE_ENV=production
 ENV NODE_ENV=$NODE_ENV
@@ -10,10 +10,5 @@ RUN ./scripts/install-poppler-alpine.sh
 RUN mkdir /app
 WORKDIR /app
 
-COPY package.json package.json
-COPY yarn.lock yarn.lock
-RUN yarn --silent
-
-RUN apk del .build-deps
-
 COPY . .
+RUN npm install

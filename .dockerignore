@@ -26,3 +26,5 @@ coverage/
 xunit.xml
 
 db/seeds/*
+build
+node_modules
