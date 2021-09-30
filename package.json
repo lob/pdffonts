@@ -9,8 +9,8 @@
   "scripts": {
     "build": "node-gyp rebuild",
     "cover": "lcov -c -d build/Debug/obj.target/pdffonts/src -o coverage.info && lcov -e coverage.info '*pdffonts.cc' -o coverage.info",
-    "cover:html": "yarn run cover && genhtml coverage.info -o coverage",
-    "coveralls": "yarn run cover && cat coverage.info | coveralls",
+    "cover:html": "npm run cover && genhtml coverage.info -o coverage",
+    "coveralls": "npm run cover && cat coverage.info | coveralls",
     "lint": "eslint .",
     "release:major": "changelog -M && git add CHANGELOG.md && git commit -m 'updated CHANGELOG.md' && npm version major && git push origin && git push origin --tags",
     "release:minor": "changelog -m && git add CHANGELOG.md && git commit -m 'updated CHANGELOG.md' && npm version minor && git push origin && git push origin --tags",

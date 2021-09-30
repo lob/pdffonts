@@ -2,7 +2,7 @@
 
 THRESHOLD=100
 
-COVER_OUTPUT="$(yarn run cover)"
+COVER_OUTPUT="$(npm run cover)"
 status=$?
 if [ $status -ne 0 ]; then
   exit $status
