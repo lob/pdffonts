@@ -135,7 +135,6 @@ NAN_MODULE_INIT(Init) {
   // initialized once and has a small memory footprint there is not as much of a
   // concern around memory leaks.
   if (globalParams == NULL) {
-    // globalParams = new GlobalParams();
     globalParams = std::unique_ptr<GlobalParams>(new GlobalParams);
   }
 
