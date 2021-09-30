@@ -1,6 +1,6 @@
 {
   "name": "@lob/pdffonts",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "Node bindings for Poppler's pdffonts CLI",
   "main": "./lib/pdffonts.js",
   "engines": {
