@@ -4,6 +4,14 @@
 #include <PDFDocFactory.h>
 #include <goo/GooString.h>
 #include <nan.h>
+#include <cpp/poppler-version.h>
+
+// https://github.com/scribusproject/scribus/blob/41d56c1dcaa4964ab2bddb4b0af45c208536a319/scribus/plugins/import/pdf/importpdfconfig.h#L12-L16 
+#define POPPLER_VERSION_ENCODE(major, minor, micro) (	\
+	  ((major) * 10000)				\
+	+ ((minor) *   100)				\
+	+ ((micro) *     1))
+#define POPPLER_ENCODED_VERSION POPPLER_VERSION_ENCODE(POPPLER_VERSION_MAJOR, POPPLER_VERSION_MINOR, POPPLER_VERSION_MICRO)
 
 static const char* fontTypeNames[] = {
   "unknown",
@@ -70,8 +78,13 @@ class FontsWorker : public Nan::AsyncWorker {
           fontObj->Set(context, Nan::New("name").ToLocalChecked(), Nan::New(font->getName()->c_str()).ToLocalChecked());
         }
 
-        fontObj->Set(context, Nan::New("type").ToLocalChecked(), Nan::New(fontTypeNames[font->getType()]).ToLocalChecked());
+#if POPPLER_ENCODED_VERSION >= POPPLER_VERSION_ENCODE(21, 10, 0)
+        fontObj->Set(context, Nan::New("encoding").ToLocalChecked(), Nan::New(font->getEncoding().c_str()).ToLocalChecked());
+#else
         fontObj->Set(context, Nan::New("encoding").ToLocalChecked(), Nan::New(font->getEncoding()->c_str()).ToLocalChecked());
+#endif
+
+        fontObj->Set(context, Nan::New("type").ToLocalChecked(), Nan::New(fontTypeNames[font->getType()]).ToLocalChecked());
         fontObj->Set(context, Nan::New("embedded").ToLocalChecked(), Nan::New(font->getEmbedded()));
         fontObj->Set(context, Nan::New("subset").ToLocalChecked(), Nan::New(font->getSubset()));
         fontObj->Set(context, Nan::New("unicode").ToLocalChecked(), Nan::New(font->getToUnicode()));
