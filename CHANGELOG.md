@@ -1,3 +1,9 @@
+## 3.1.0 (2021-10-11)
+
+##### Build System / Dependencies
+
+* **poppler:** Add support for Poppler 21.10
+
 ## 3.0.0 (2021-09-30)
 
 ### 2.1.0 (2021-02-11)
