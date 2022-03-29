@@ -11,14 +11,17 @@
       "cflags": [
         "<!@(pkg-config --cflags poppler)"
       ],
+      'cflags_cc': [ 
+       "-std=c++17"
+      ],
       "xcode_settings": {
         "OTHER_CFLAGS": [
-          "<!@(pkg-config --cflags poppler)"
+          "<!@(pkg-config --cflags poppler)",
+          "-std=c++17"
         ],
         "OTHER_LDFLAGS": [
           "-liconv"
         ],
-        "CLANG_CXX_LANGUAGE_STANDARD": "c++17"
       },
       "include_dirs": [
         "<!(node -e \"require('nan')\")"
