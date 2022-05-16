@@ -45,7 +45,7 @@ class FontsWorker : public Nan::AsyncWorker {
       GooString gooFilename(filename.c_str());
 
       // Open PDF
-      std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(gooFilename, nullptr, nullptr));
+      std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(gooFilename, {}, {}));
 
       // Make sure it's a valid PDF
       if (!doc->isOk()) {
@@ -72,7 +72,7 @@ class FontsWorker : public Nan::AsyncWorker {
         v8::Local<v8::Object> fontObj = Nan::New<v8::Object>();
         v8::Local<v8::Context> context = Nan::GetCurrentContext();
 
-        if (font->getName() == NULL) {
+        if (!font->getName()) {
           fontObj->Set(context, Nan::New("name").ToLocalChecked(), Nan::Null());
         } else {
           fontObj->Set(context, Nan::New("name").ToLocalChecked(), Nan::New(font->getName()->c_str()).ToLocalChecked());
