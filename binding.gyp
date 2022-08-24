@@ -11,8 +11,8 @@
       "cflags": [
         "<!@(pkg-config --cflags poppler)"
       ],
-      'cflags_cc': [ 
-       "-std=c++17"
+      'cflags_cc': [
+        "-std=c++17"
       ],
       "xcode_settings": {
         "OTHER_CFLAGS": [
@@ -23,8 +23,29 @@
           "-liconv"
         ],
       },
-      "include_dirs": [
-        "<!(node -e \"require('nan')\")"
+      "include_dirs": ["<!@(node -p \"require('node-addon-api').include\")"],
+      "dependencies": ["<!(node -p \"require('node-addon-api').gyp\")"],
+      "defines": [ "NAPI_CPP_EXCEPTIONS" ],
+      "conditions": [
+        ['OS=="mac"', {
+          'xcode_settings': {
+            'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
+            'OTHER_CFLAGS': [
+              "<!@(pkg-config --cflags poppler)",
+              "<!@(dirname -- `pkg-config --cflags poppler`)",
+              "-stdlib=libc++",
+              "-std=c++17"
+            ],
+            "OTHER_LDFLAGS": [
+              "-liconv"
+            ]
+          },
+        }],
+        ['OS!="win"', {
+          'cflags_cc+': [
+            '-std=c++17',
+          ],
+        }],
       ],
       "configurations": {
         "Debug": {
