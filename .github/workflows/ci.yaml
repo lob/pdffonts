@@ -1,0 +1,37 @@
+name: Build and Test
+
+on:
+  push:
+
+env:
+  CONTAINER_IMAGE: pdffonts-test:${{ github.sha }}-${{ github.run_id }} 
+  CONTAINER_NAME: pdffonts_test_run_${{ github.sha }}-${{ github.run_id }}
+
+jobs:
+  ci:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Build container image
+        run: docker build --build-arg NODE_ENV=development -t "$CONTAINER_IMAGE" .
+
+      - name: Start container
+        run: docker run --name "$CONTAINER_NAME" -t -d "$CONTAINER_IMAGE"
+
+      - name: Run linter
+        run: docker exec -t "$CONTAINER_NAME" npm run lint
+
+      - name: Run tests
+        run: docker exec -t "$CONTAINER_NAME" npm run test
+
+      - name: Enforce coverage
+        run: docker exec -t "$CONTAINER_NAME" ./scripts/enforce_coverage.sh
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker rm --force "$CONTAINER_NAME"
+          docker rmi "$CONTAINER_IMAGE"
