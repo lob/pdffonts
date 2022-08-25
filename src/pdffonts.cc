@@ -1,9 +1,9 @@
+#include <napi.h>
 #include <FontInfo.h>
 #include <GlobalParams.h>
 #include <PDFDoc.h>
 #include <PDFDocFactory.h>
 #include <goo/GooString.h>
-#include <nan.h>
 #include <cpp/poppler-version.h>
 
 // https://github.com/scribusproject/scribus/blob/41d56c1dcaa4964ab2bddb4b0af45c208536a319/scribus/plugins/import/pdf/importpdfconfig.h#L12-L16 
@@ -28,15 +28,14 @@ static const char* fontTypeNames[] = {
   "CID TrueType (OT)"
 };
 
-class FontsWorker : public Nan::AsyncWorker {
+class FontsWorker : public Napi::AsyncWorker {
   public:
-    std::string filename;
     std::vector<FontInfo*> fonts;
+    std::string filename;
 
-    FontsWorker(std::string filename, Nan::Callback* callback)
-    : Nan::AsyncWorker(callback, "nan:pdffonts.FontsWorker") {
-      this->filename = filename;
-    }
+    FontsWorker(Napi::Function &callback, std::string filename)
+        : Napi::AsyncWorker(callback), filename(filename) {}
+    ~FontsWorker() {}
 
     // It is not safe to access V8, or V8 data structures here, so everything
     // we need for input and output should go on `this`.
@@ -49,7 +48,7 @@ class FontsWorker : public Nan::AsyncWorker {
 
       // Make sure it's a valid PDF
       if (!doc->isOk()) {
-        this->SetErrorMessage("file is not a valid PDF");
+        SetError("file is not a valid PDF");
         return;
       }
 
@@ -60,98 +59,96 @@ class FontsWorker : public Nan::AsyncWorker {
 
     // Executed when the async work is complete. This function will be run
     // inside the main event loop so it is safe to use V8 again.
-    void HandleOKCallback () {
-      Nan::HandleScope scope;
-
-      v8::Local<v8::Array> fontArray = Nan::New<v8::Array>(fonts.size());
+    void OnOK() {
+      Napi::Array fontArray = Napi::Array::New(Env(), fonts.size());
 
       for (int i = 0; i < (int)fonts.size(); ++i) {
         FontInfo* font = (FontInfo*)this->fonts[i];
         const Ref fontRef = font->getRef();
 
-        v8::Local<v8::Object> fontObj = Nan::New<v8::Object>();
-        v8::Local<v8::Context> context = Nan::GetCurrentContext();
+        // Create a JS font object
+        Napi::Object fontObj = Napi::Object::New(Env());
 
         if (!font->getName()) {
-          fontObj->Set(context, Nan::New("name").ToLocalChecked(), Nan::Null());
+          fontObj.Set("name", Env().Null());
         } else {
-          fontObj->Set(context, Nan::New("name").ToLocalChecked(), Nan::New(font->getName()->c_str()).ToLocalChecked());
+          fontObj.Set("name", font->getName()->c_str());
         }
 
 #if POPPLER_ENCODED_VERSION >= POPPLER_VERSION_ENCODE(21, 10, 0)
-        fontObj->Set(context, Nan::New("encoding").ToLocalChecked(), Nan::New(font->getEncoding().c_str()).ToLocalChecked());
+        fontObj.Set("encoding", font->getEncoding().c_str());
 #else
-        fontObj->Set(context, Nan::New("encoding").ToLocalChecked(), Nan::New(font->getEncoding()->c_str()).ToLocalChecked());
+        fontObj.Set("encoding", font->getEncoding()->c_str());
 #endif
 
-        fontObj->Set(context, Nan::New("type").ToLocalChecked(), Nan::New(fontTypeNames[font->getType()]).ToLocalChecked());
-        fontObj->Set(context, Nan::New("embedded").ToLocalChecked(), Nan::New(font->getEmbedded()));
-        fontObj->Set(context, Nan::New("subset").ToLocalChecked(), Nan::New(font->getSubset()));
-        fontObj->Set(context, Nan::New("unicode").ToLocalChecked(), Nan::New(font->getToUnicode()));
+        fontObj.Set("type", fontTypeNames[font->getType()]);
+        fontObj.Set("embedded", font->getEmbedded());
+        fontObj.Set("subset", font->getSubset());
+        fontObj.Set("unicode", font->getToUnicode());
 
         // Invalid object generation number should set object metadata to null
         // Logic taken from pdffonts.cc
         // See: https://cgit.freedesktop.org/poppler/poppler/tree/utils/pdffonts.cc?id=eb1291f86260124071e12226294631ce685eaad6#n207
         if (fontRef.gen >= 100000) {
-          fontObj->Set(context, Nan::New("object").ToLocalChecked(), Nan::Null());
+          fontObj.Set("object", Env().Null());
         } else {
           // PDF object reference metadata
           // For context see: http://www.printmyfolders.com/understanding-pdf
-          v8::Local<v8::Object> objectObj = Nan::New<v8::Object>();
+          Napi::Object objectObj = Napi::Object::New(Env());
 
-          objectObj->Set(context, Nan::New("number").ToLocalChecked(), Nan::New(fontRef.num));
-          objectObj->Set(context, Nan::New("generation").ToLocalChecked(), Nan::New(fontRef.gen));
+          objectObj.Set("number", fontRef.num);
+          objectObj.Set("generation", fontRef.gen);
 
-          fontObj->Set(context, Nan::New("object").ToLocalChecked(), objectObj);
+          fontObj.Set("object", objectObj);
         }
 
-        fontArray->Set(context, i, fontObj);
+        fontArray[i] = fontObj;
+
         delete font;
       }
 
-      v8::Local<v8::Value> argv[] = {
-        Nan::Null(),
-        fontArray
-      };
-
-      callback->Call(2, argv, async_resource);
+      Callback().Call({Env().Undefined(), fontArray});
     }
 };
 
-NAN_METHOD(Fonts) {
+Napi::Value Fonts(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
   if (info.Length() < 2) {
-    return Nan::ThrowError(Nan::New("expected 2 arguments").ToLocalChecked());
+    Napi::TypeError::New(env, "expected 2 arguments")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
   }
 
   // Validate that arguments are correct
-  if (!info[0]->IsString()) {
-    return Nan::ThrowError(Nan::New("expected arg 0: string filename").ToLocalChecked());
+  if (!info[0].IsString()) {
+    Napi::TypeError::New(env, "expected arg 0: string filename")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
   }
 
-  if(!info[1]->IsFunction()) {
-    return Nan::ThrowError(Nan::New("expected arg 1: function callback").ToLocalChecked());
+  if(!info[1].IsFunction()) {
+    Napi::TypeError::New(env, "expected arg 1: function callback")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
   }
 
-  // Start the async worker
-  Nan::AsyncQueueWorker(new FontsWorker(
-    std::string(*Nan::Utf8String(info[0])),
-    new Nan::Callback(info[1].As<v8::Function>())
-  ));
+  const std::string filename = std::string(info[0].As<Napi::String>());
+  Napi::Function callback = info[1].As<Napi::Function>(); 
+
+  FontsWorker* fontWorker = new FontsWorker(callback, filename);
+  fontWorker->Queue();
+
+  return env.Undefined();
 }
 
-NAN_MODULE_INIT(Init) {
-  // Set globalParams once. globalParams is a global variable and is referenced
-  // by poppler in various methods.
-  //
-  // NOTE: This object is not explicitly cleaned up because the nan API makes it
-  // difficult to determine when a module can be cleaned up. Because it is
-  // initialized once and has a small memory footprint there is not as much of a
-  // concern around memory leaks.
+Napi::Object Init(Napi::Env env, Napi::Object exports) {
   if (globalParams == NULL) {
     globalParams = std::unique_ptr<GlobalParams>(new GlobalParams);
   }
 
-  Nan::SetMethod(target, "fonts", Fonts);
+  exports.Set("fonts", Napi::Function::New(env, Fonts));
+  return exports;
 }
 
-NODE_MODULE(pdffonts, Init)
+NODE_API_MODULE(NODE_GYP_MODULE_NAME, Init)
