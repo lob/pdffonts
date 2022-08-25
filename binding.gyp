@@ -12,7 +12,8 @@
         "<!@(pkg-config --cflags poppler)"
       ],
       'cflags_cc': [
-        "-std=c++17"
+        "-std=c++17",
+        "-fexceptions"
       ],
       "xcode_settings": {
         "OTHER_CFLAGS": [
