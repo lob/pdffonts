@@ -1,8 +1,6 @@
 # pdffonts
 
-[![Build Status](https://travis-ci.org/lob/pdffonts.svg?branch=master)](https://travis-ci.org/lob/pdffonts)
-[![Coverage Status](https://coveralls.io/repos/github/lob/pdffonts/badge.svg?branch=master)](https://coveralls.io/github/lob/pdffonts?branch=master)
-
+[![Build Status](https://github.com/lob/pdffonts/actions/workflows/ci.yml/badge.svg))]
 Node bindings for Poppler's `pdffonts` CLI.
 
 ## Dependencies
