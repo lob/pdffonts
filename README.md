@@ -1,6 +1,6 @@
 # pdffonts
 
-[![Build Status](https://github.com/lob/pdffonts/actions/workflows/ci.yml/badge.svg))]
+[![Build Status](https://github.com/lob/pdffonts/actions/workflows/ci.yaml/badge.svg))]
 Node bindings for Poppler's `pdffonts` CLI.
 
 ## Dependencies
