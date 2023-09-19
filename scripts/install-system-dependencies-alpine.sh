@@ -1,10 +1,8 @@
 #!/usr/bin/env sh
 
-apk update
-
-# Install certs so we can pull from https sources
-apk add --no-cache ca-certificates
-update-ca-certificates
-
-# For cov reports
-apk add lcov --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing
+apt-get update \
+    && apt-get upgrade \
+    && apt-get install -y bash ca-certificates \
+    && update-ca-certificates \
+    && apt-get install -y lcov \
+    && rm -rf /var/lib/apt/lists/* \
