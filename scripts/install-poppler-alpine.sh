@@ -6,7 +6,8 @@
 # - Add pkgconf, poppler-simple needs pkg-config to build
 # - Add poppler-dev, the standard poppler package won't do
 # - Add poppler-data from community repo
-apk add alpine-sdk
-apk add pkgconf
-apk add poppler-dev
-apk add poppler-data --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
+apt-get update \
+    && apt-get install -y python3 make g++ \
+    && apt-get install -y pkg-config \
+    && apt-get install -y libpoppler-cpp-dev libpoppler-private-dev \
+    && apt-get install -y poppler-data
