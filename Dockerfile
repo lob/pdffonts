@@ -1,4 +1,4 @@
-FROM node:18.17.1-bullseye-slim
+FROM node:20.6.0-bullseye-slim
 
 ARG NODE_ENV=production
 ENV NODE_ENV=$NODE_ENV
