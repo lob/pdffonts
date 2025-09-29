@@ -89,3 +89,6 @@ $ npm run cover:html
 ```bash
 $ npm run lint
 ```
+
+## Publishing to npm
+Our GitHub action "Publish" automatically publishes the package to npm upon pushes to the `main` branch
