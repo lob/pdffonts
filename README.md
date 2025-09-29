@@ -91,4 +91,4 @@ $ npm run lint
 ```
 
 ## Publishing to npm
-Our github action "Publish" automatically publishes the package to npm upon pushes to the 'main' branch
+Our GitHub action "Publish" automatically publishes the package to npm upon pushes to the `main` branch
