@@ -2,8 +2,9 @@ name: Publish
 
 on:
   push:
-    branches:
-      - main
+    # branches:
+    #   - main
+    # HI REVIEWER I FORGOT TO ADD THIS BACK
 
 jobs:
   publish:
@@ -19,45 +20,51 @@ jobs:
       - name: Install node and npm
         uses: './.github/actions/install-node-and-npm'
 
+      - name: install system dependencies
+        run: bash ./scripts/install-system-dependencies-debian.sh
+
+      - name: install poppler
+        run: bash ./scripts/install-poppler-debian.sh
+
       - name: Install dependencies
         run: npm install --silent
 
-      - name: Publish the package to npm
-        id: publish
-        uses: JS-DevTools/npm-publish@v3
-        with:
-          token: ${{ env.NPM_TOKEN }}
-          # npm-publish has a built-in version checking by default
+      # - name: Publish the package to npm
+      #   id: publish
+      #   uses: JS-DevTools/npm-publish@v3
+      #   with:
+      #     token: ${{ env.NPM_TOKEN }}
+      #     # npm-publish has a built-in version checking by default
 
-      - name: Add git tag ${{ steps.publish.outputs.version }}
-        if: steps.publish.outputs.type != 'none'
-        uses: actions/github-script@v7
-        env:
-          NEW_VERSION: '${{ steps.publish.outputs.version }}'
-          OLD_VERSION: '${{ steps.publish.outputs.old-version }}'
-        with:
-          script: |
-            const { OLD_VERSION, NEW_VERSION } = process.env;
+      # - name: Add git tag ${{ steps.publish.outputs.version }}
+      #   if: steps.publish.outputs.type != 'none'
+      #   uses: actions/github-script@v7
+      #   env:
+      #     NEW_VERSION: '${{ steps.publish.outputs.version }}'
+      #     OLD_VERSION: '${{ steps.publish.outputs.old-version }}'
+      #   with:
+      #     script: |
+      #       const { OLD_VERSION, NEW_VERSION } = process.env;
 
-            console.log(`Version changed: ${OLD_VERSION} => ${NEW_VERSION}`);
+      #       console.log(`Version changed: ${OLD_VERSION} => ${NEW_VERSION}`);
 
-            // create the tag
-            const tagRes = await github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: `refs/tags/${NEW_VERSION}`,
-              sha: context.sha
-            });
-            console.log(`Tag creation result: ${tagRes.status}`);
+      #       // create the tag
+      #       const tagRes = await github.rest.git.createRef({
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         ref: `refs/tags/${NEW_VERSION}`,
+      #         sha: context.sha
+      #       });
+      #       console.log(`Tag creation result: ${tagRes.status}`);
 
-            // create the release
-            console.log(`Creating release ${NEW_VERSION}`);
-            const relRes = await github.rest.repos.createRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              tag_name: NEW_VERSION,
-              name: NEW_VERSION,
-              body: `Please refer to [CHANGELOG.md](https://github.com/lob/ui-components/blob/main/CHANGELOG.md) for details.`,
-              generate_release_notes: true
-            });
-            console.log(`Release creation result: ${relRes.status}`);
+      #       // create the release
+      #       console.log(`Creating release ${NEW_VERSION}`);
+      #       const relRes = await github.rest.repos.createRelease({
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         tag_name: NEW_VERSION,
+      #         name: NEW_VERSION,
+      #         body: `Please refer to [CHANGELOG.md](https://github.com/lob/ui-components/blob/main/CHANGELOG.md) for details.`,
+      #         generate_release_notes: true
+      #       });
+      #       console.log(`Release creation result: ${relRes.status}`);
