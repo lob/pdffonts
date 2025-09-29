@@ -20,11 +20,11 @@ jobs:
       - name: Install node and npm
         uses: './.github/actions/install-node-and-npm'
 
-      - name: install system dependencies
-        run: bash ./scripts/install-system-dependencies-debian.sh
+      - name: Install system dependencies
+        run: sudo bash ./scripts/install-system-dependencies-debian.sh
 
-      - name: install poppler
-        run: bash ./scripts/install-poppler-debian.sh
+      - name: Install poppler
+        run: sudo bash ./scripts/install-poppler-debian.sh
 
       - name: Install dependencies
         run: npm install --silent
