@@ -1,4 +1,8 @@
 ### 3.6.0 (2025-09-30)
+Resolve package vulnerabilities
+
+### 3.5.0 (2025-09-29)
+Upgrade to node 20
 
 ##### Other Changes
 
