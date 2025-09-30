@@ -1,3 +1,9 @@
+### 3.6.0 (2025-09-30)
+
+##### Other Changes
+
+*  update deprecated GitHub Actions ([#30](https://github.com/lob/pdffonts/pull/30)) ([31b52f42](https://github.com/lob/pdffonts/commit/31b52f42efebe9b5e747398607529b2491832180))
+
 ### 3.4.0 (2023-09-19)
 
 ## 3.1.0 (2021-10-11)
