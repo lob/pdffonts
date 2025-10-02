@@ -6,7 +6,6 @@ module.exports = [
       ecmaVersion: 2018,
       sourceType: 'script',
       globals: {
-        expect: false,
         // From eslint-config-lob env settings
         console: 'readonly',
         process: 'readonly',
