@@ -1,4 +1,6 @@
 'use strict';
+const stylistic = require('@stylistic/eslint-plugin');
+
 module.exports = [
   {
     languageOptions: {
@@ -25,12 +27,14 @@ module.exports = [
         afterEach: 'readonly'
       }
     },
+    plugins: {
+      '@stylistic': stylistic
+    },
     rules: {
       // From eslint-config-lob rules
-      'arrow-parens': 'error',
-      'arrow-spacing': 'error',
-      'constructor-super': 'error',
-      'generator-star-spacing': 'error',
+      '@stylistic/arrow-parens': 'error',
+      '@stylistic/arrow-spacing': 'error', 
+      '@stylistic/generator-star-spacing': 'error',
       'no-class-assign': 'error',
       'no-confusing-arrow': 'error',
       'no-const-assign': 'error',
@@ -41,7 +45,6 @@ module.exports = [
       'object-shorthand': ['error', 'properties'],
       'prefer-arrow-callback': 'error',
       'prefer-const': 'error',
-      'prefer-reflect': 'error',
       'prefer-spread': 'error',
       'prefer-template': 'error',
       'require-yield': 'error'

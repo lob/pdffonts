@@ -1,9 +1,0 @@
-{
-  "extends": "eslint-config-lob",
-  "globals": {
-    "expect": false
-  },
-  "parserOptions": {
-    "ecmaVersion": 2018
-  }
-}
