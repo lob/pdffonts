@@ -1,10 +1,11 @@
-import stylistic from '@stylistic/eslint-plugin';
+'use strict';
+const stylistic = require('@stylistic/eslint-plugin');
 
-export default [
+module.exports = [
   {
     languageOptions: {
       ecmaVersion: 2018,
-      sourceType: 'module', // Changed from 'script' to 'module'
+      sourceType: 'script',
       globals: {
         expect: false,
         // From eslint-config-lob env settings
