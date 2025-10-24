@@ -1,3 +1,5 @@
+### 3.6.1 (2025-10-24)
+
 ### 3.6.0 (2025-09-30)
 Resolve package vulnerabilities
 
