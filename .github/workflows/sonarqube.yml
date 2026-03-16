@@ -1,0 +1,101 @@
+name: SonarQube Analysis
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  sonarqube:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install system dependencies
+        run: sudo bash ./scripts/install-system-dependencies-debian.sh
+
+      - name: Install poppler
+        run: sudo bash ./scripts/install-poppler-debian.sh
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+        continue-on-error: true
+
+      - name: Generate C++ coverage
+        run: npm run cover
+        continue-on-error: true
+
+      - name: Prepare coverage reports for SonarCloud
+        run: |
+          mkdir -p coverage
+          cp coverage.info coverage/lcov.info
+          genhtml coverage.info -o coverage
+        continue-on-error: true
+
+      - name: Generate metrics JSON
+        run: node scripts/generate-metrics.js
+
+      - name: Post test inventory to summary
+        if: always()
+        run: |
+          if [ -f metrics.json ]; then
+            node -e "
+              const m = require('./metrics.json');
+              const cov = m.coverage?.lines?.pct != null ? m.coverage.lines.pct + '%' : 'N/A';
+              const brCov = m.coverage?.branches?.pct != null ? m.coverage.branches.pct + '%' : 'N/A';
+              const fnCov = m.coverage?.functions?.pct != null ? m.coverage.functions.pct + '%' : 'N/A';
+              let md = '## 📊 Test Inventory & Coverage — ' + m.repository + '\n\n';
+              md += '| Metric | Value |\n|---|---|\n';
+              md += '| **Repository** | ' + m.repository + ' |\n';
+              md += '| **Version** | ' + m.version + ' |\n';
+              md += '| **Unit Test Files** | ' + m.tests.unitFiles + ' |\n';
+              md += '| **Integration Test Files** | ' + m.tests.integrationFiles + ' |\n';
+              md += '| **Total Test Files** | ' + m.tests.totalFiles + ' |\n';
+              md += '| **Line Coverage** | ' + cov + ' |\n';
+              md += '| **Branch Coverage** | ' + brCov + ' |\n';
+              md += '| **Function Coverage** | ' + fnCov + ' |\n\n';
+              if (m.tests.unitTestFiles.length > 0) {
+                md += '### Unit Tests\n';
+                m.tests.unitTestFiles.forEach(f => md += '- \`' + f + '\`\n');
+                md += '\n';
+              }
+              if (m.tests.integrationTestFiles.length > 0) {
+                md += '### Integration Tests\n';
+                m.tests.integrationTestFiles.forEach(f => md += '- \`' + f + '\`\n');
+              }
+              require('fs').appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
+            "
+          fi
+
+      - name: SonarQube Cloud Scan
+        uses: SonarSource/sonarcloud-github-action@v3
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload metrics artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-metrics
+          path: metrics.json
+          if-no-files-found: ignore
+
+      - name: Upload HTML coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-html
+          path: coverage/
+          if-no-files-found: ignore
