@@ -25,9 +25,9 @@ function getPackageInfo() {
     return {
       name: pkg.name,
       version: pkg.version,
-      repository: pkg.repository?.url || pkg.repository || "",
+      repository: (pkg.repository && pkg.repository.url) || pkg.repository || "",
     };
-  } catch {
+  } catch (e) {
     return { name: path.basename(repoRoot), version: "unknown", repository: "" };
   }
 }
