@@ -102,8 +102,9 @@ function parseLcov() {
     if (line.startsWith("FNF:")) functionsTotal += parseInt(line.slice(4), 10);
   }
 
-  const pct = (hit, total) =>
-    total > 0 ? Math.round((hit / total) * 10000) / 100 : null;
+  const pct = (hit, total) => {
+    return total > 0 ? Math.round((hit / total) * 10000) / 100 : null;
+  };
 
   return {
     lines: { hit: linesHit, total: linesTotal, pct: pct(linesHit, linesTotal) },
